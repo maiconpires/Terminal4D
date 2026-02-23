@@ -1,5 +1,5 @@
 # Terminal4D
-Create powerful console terminals for Delphi applications in minutes.
+Create powerful cross platform console terminals for Delphi applications in minutes.
 
 **Terminal4D** is a lightweight and extensible framework designed to simplify the creation of structured console applications in Delphi. It provides built-in support for command registration, parameter parsing, and contextual help generation — allowing you to focus on business logic instead of boilerplate code.
 
