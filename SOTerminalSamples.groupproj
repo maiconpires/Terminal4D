@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{900DD3E9-D7C0-4753-81CF-BB389D43FFE4}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="SOTerminal_ex1.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="SOTerminal_ex2.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="SimpleTerminal.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="SOTerminal_ex1">
+        <MSBuild Projects="SOTerminal_ex1.dproj"/>
+    </Target>
+    <Target Name="SOTerminal_ex1:Clean">
+        <MSBuild Projects="SOTerminal_ex1.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SOTerminal_ex1:Make">
+        <MSBuild Projects="SOTerminal_ex1.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SOTerminal_ex2">
+        <MSBuild Projects="SOTerminal_ex2.dproj"/>
+    </Target>
+    <Target Name="SOTerminal_ex2:Clean">
+        <MSBuild Projects="SOTerminal_ex2.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SOTerminal_ex2:Make">
+        <MSBuild Projects="SOTerminal_ex2.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="SimpleTerminal">
+        <MSBuild Projects="SimpleTerminal.dproj"/>
+    </Target>
+    <Target Name="SimpleTerminal:Clean">
+        <MSBuild Projects="SimpleTerminal.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="SimpleTerminal:Make">
+        <MSBuild Projects="SimpleTerminal.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="SOTerminal_ex1;SOTerminal_ex2;SimpleTerminal"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="SOTerminal_ex1:Clean;SOTerminal_ex2:Clean;SimpleTerminal:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="SOTerminal_ex1:Make;SOTerminal_ex2:Make;SimpleTerminal:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
