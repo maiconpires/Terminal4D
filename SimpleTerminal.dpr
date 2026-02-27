@@ -72,6 +72,33 @@ begin
         TTerminal.Stop;
       end,
       'Halt terminal')
+    .AddCommand('teste',
+      procedure (ACommand: String)
+      begin
+        TTerminal
+          .WRL('')
+          .WR_L('L123456789', 0)
+          .WRL_L('TABX', 15)
+          .WR_L('L123456', 0)
+          .WRL_L('TABX', 15)
+          .WR_L('L123', 0)
+          .WRL_L('TABX', 15)
+          .WR_C('C123456789', 0)
+          .WRL_C('T', 12)
+          .WR_C('C123456', 0)
+          .WRL_C('T123', 12)
+          .WR_C('C123', 0)
+          .WRL_C('T123456',12)
+          .WRL_R('R123456789', 0)
+          .WRL_R('R123456', 1)
+          .WRL_R('R123', 2)
+          .WR_L('L123456789', 0)
+          .WR_L('TABX:', 15)
+          .WR_C('C123', 0)
+          .WRL_R('R123456789', 0)
+
+      end,
+      'Cursor position test')
     .Start
     .WaitFor
     .WRL('TERMINATED! Press ENTER to close.', 0, tcRed);

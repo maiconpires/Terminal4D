@@ -116,6 +116,7 @@ type
     class procedure WriteColor(AText: String; AColor: tcColor; ASpaces: Integer=0);
     class procedure WriteLNColor(AText: String; AColor: tcColor; ASpaces: Integer=0);
   public
+    class var cx: Integer;
 
     class function &Label(const AValue: String): TTerminalClass;
 
@@ -139,11 +140,13 @@ type
 
     class function WR_L(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
     class function WR_C(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
-    class function WR_R(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
+    // não faz sentido uma vez que não dá para voltar e reescrever a linha antes de quebra-la
+//    class function WR_R(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
 
     class function WRL_L(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
     class function WRL_C(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
     class function WRL_R(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
+
   end;
 
 {$REGION 'Como não temos (Posix.SysIoctl, Posix.ioctl, ioctl, SysIoctl) fazemos a moda antiga'}
@@ -298,6 +301,7 @@ begin
   else
     Result := 0;
 end;
+
 {$ENDIF}
 {$ENDREGION}
 
@@ -306,44 +310,40 @@ end;
 class procedure TTerminal.WriteColor(AText: String; AColor: tcColor; ASpaces: Integer=0);
 begin
   System.Write(Format('%s[%dm%s[%dC%s',[#27,Ord(AColor), #27, ASpaces, AText]));
+  cx := cx+ASpaces+Length(AText);
 end;
 
 class procedure TTerminal.WriteLNColor(AText: String; AColor: tcColor; ASpaces: Integer);
 begin
   System.WriteLN(Format('%s[%dm%s[%dC%s',[#27,Ord(AColor), #27, ASpaces, AText]));
+  cx := 0;
 end;
 
 class function TTerminal.WR_L(AText: String; ASpaces: Integer;   AColor: tcColor): TTerminalClass;
 begin
-  WriteColor(AText, AColor, TTerminalTextAlign.Left+ASpaces);
+  WriteColor(AText, AColor, TTerminalTextAlign.Left + ASpaces - cx-1);
 end;
 
 class function TTerminal.WR_C(AText: String; ASpaces: Integer;
   AColor: tcColor): TTerminalClass;
 begin
-  WriteColor(AText, AColor, TTerminalTextAlign.Center-ASpaces-Trunc(Length(AText)/2));
-end;
-
-class function TTerminal.WR_R(AText: String; ASpaces: Integer;
-  AColor: tcColor): TTerminalClass;
-begin
-  WriteColor(AText, AColor, TTerminalTextAlign.Right-ASpaces-Trunc(Length(AText)));
+  WriteColor(AText, AColor, TTerminalTextAlign.Center+ASpaces-Trunc(Length(AText)/2)-cx-1);
 end;
 
 class function TTerminal.WRL_L(AText: String; ASpaces: Integer;
   AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, TTerminalTextAlign.Left+ASpaces);
+  WriteLNColor(AText, AColor, TTerminalTextAlign.Left + ASpaces - cx-1);
 end;
 
 class function TTerminal.WRL_C(AText: String; ASpaces: Integer; AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, TTerminalTextAlign.Center-ASpaces-Trunc(Length(AText)/2));
+  WriteLNColor(AText, AColor, TTerminalTextAlign.Center+ASpaces-Trunc(Length(AText)/2)-cx-1);
 end;
 
 class function TTerminal.WRL_R(AText: String; ASpaces: Integer; AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, TTerminalTextAlign.Right-ASpaces-Trunc(Length(AText)));
+  WriteLNColor(AText, AColor, TTerminalTextAlign.Right-ASpaces-Trunc(Length(AText))-cx-1);
 end;
 
 {$ELSE}
@@ -357,6 +357,7 @@ begin
   SetConsoleTextAttribute(Console, FOREGROUND_INTENSITY or Word(AColor));
     System.Write( AText: ASpaces );
   SetConsoleTextAttribute(Console, BufInfo.wAttributes);
+  Inc(cx, ASpaces);
 end;
 
 class procedure TTerminal.WriteLNColor(AText: String; AColor: tcColor; ASpaces: Integer);
@@ -369,40 +370,35 @@ begin
   SetConsoleTextAttribute(Console, FOREGROUND_INTENSITY or Word(AColor));
     System.WriteLN( AText: ASpaces );
   SetConsoleTextAttribute(Console, BufInfo.wAttributes);
+  cx := 0;
 end;
 
 class function TTerminal.WR_L(AText: String; ASpaces: Integer;
   AColor: tcColor): TTerminalClass;
 begin
-  WriteColor(AText, AColor, Length(AText)+TTerminalTextAlign.Left+ASpaces);
+  WriteColor(AText, AColor, Length(AText)+TTerminalTextAlign.Left+ASpaces - cx);
 end;
 
 class function TTerminal.WR_C(AText: String; ASpaces: Integer;
   AColor: tcColor): TTerminalClass;
 begin
-  WriteColor(AText, AColor, Trunc(Length(AText)/2)+TTerminalTextAlign.Center+ASpaces);
-end;
-
-class function TTerminal.WR_R(AText: String; ASpaces: Integer;
-  AColor: tcColor): TTerminalClass;
-begin
-  WriteColor(AText, AColor, TTerminalTextAlign.Right-ASpaces);
+  WriteColor(AText, AColor, Trunc(Length(AText)/2)+TTerminalTextAlign.Center+ASpaces - trunc(cx));
 end;
 
 class function TTerminal.WRL_L(AText: String; ASpaces: Integer;
   AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, Length(AText)+TTerminalTextAlign.Left+ASpaces);
+  WriteLNColor(AText, AColor, Length(AText)+TTerminalTextAlign.Left+ASpaces - cx);
 end;
 
 class function TTerminal.WRL_C(AText: String; ASpaces: Integer; AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, Trunc(Length(AText)/2)+TTerminalTextAlign.Center+ASpaces);
+  WriteLNColor(AText, AColor, Trunc(Length(AText)/2)+TTerminalTextAlign.Center+ASpaces - trunc(cx));
 end;
 
 class function TTerminal.WRL_R(AText: String; ASpaces: Integer; AColor: tcColor): TTerminalClass;
 begin
-  WriteLNColor(AText, AColor, TTerminalTextAlign.Right-ASpaces);
+  WriteLNColor(AText, AColor, TTerminalTextAlign.Right-ASpaces-cx);
 end;
 
 {$ENDIF}
@@ -439,6 +435,7 @@ begin
 end;
 
 initialization
+  TTerminal.cx := 1;
   TTerminal.FLabel := 'SOiS Terminal';
   TTerminal.FParams := TTerminalParamList.Create;
   TTerminal.FCommands := TTerminalCommandList.Create;
@@ -450,6 +447,7 @@ initialization
   begin
     while not TThread.CurrentThread.CheckTerminated do begin
       TTerminal.WR(TTerminal.FLabel+'> ');
+      TTerminal.cx := 0;
       Readln(TTerminal.FInput);
 
       LInput := TTerminal.FInput.Split([' ']);
