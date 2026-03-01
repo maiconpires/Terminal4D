@@ -528,7 +528,8 @@ initialization
       TTerminal.cx := 0;
       Readln(TTerminal.FInput);
 
-      LInput := TTerminal.FInput.Split([' ']);
+//      LInput := TTerminal.FInput.Split([' ']);
+      LInput := TTerminal.ParseCommandLine(TTerminal.FInput);
       if Length(LInput) = 0 then continue;
 
       if TTerminal.FCommands.TryGetValue(LInput[0], LCommand) then
