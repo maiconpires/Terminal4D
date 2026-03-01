@@ -147,6 +147,9 @@ type
     class function WRL_C(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
     class function WRL_R(AText: String; ASpaces: Integer=0; AColor: tcColor=tcWhite): TTerminalClass; overload;
 
+    class function ParseCommandLine(const AInput: string): TArray<string>; overload;
+    class function ParseCommandLine(const AInput: string; out ACommands: TArray<String>): TTerminalClass; overload;
+
   end;
 
 {$REGION 'Como não temos (Posix.SysIoctl, Posix.ioctl, ioctl, SysIoctl) fazemos a moda antiga'}
@@ -210,6 +213,81 @@ end;
 class function TTerminal.GetParams: TTerminalParamList;
 begin
   Result := FParams;
+end;
+
+class function TTerminal.ParseCommandLine(const AInput: string): TArray<string>;
+var
+  I: Integer;
+  InQuotes: Boolean;
+  EscapeNext: Boolean;
+  Current: string;
+  C: Char;
+  List: TList<string>;
+begin
+  List := TList<string>.Create;
+  try
+    InQuotes := False;
+    EscapeNext := False;
+    Current := '';
+
+    for I := 1 to Length(AInput) do
+    begin
+      C := AInput[I];
+
+      if EscapeNext then
+      begin
+        Current := Current + C;
+        EscapeNext := False;
+        Continue;
+      end;
+
+      case C of
+        '\':
+          begin
+            EscapeNext := True;
+          end;
+        '"':
+          begin
+            if not EscapeNext then
+              InQuotes := not InQuotes
+            else
+              Current := Current + C;
+          end;
+        ' ':
+          begin
+            if InQuotes then
+              Current := Current + C
+            else
+            begin
+              if Current <> '' then
+              begin
+                List.Add(Current);
+                Current := '';
+              end;
+            end;
+          end;
+      else
+        Current := Current + C;
+      end;
+    end;
+
+    if EscapeNext then
+      Current := Current + '\';
+
+    if Current <> '' then
+      List.Add(Current);
+
+    Result := List.ToArray;
+  finally
+    List.Free;
+  end;
+end;
+
+class function TTerminal.ParseCommandLine(const AInput: string; out ACommands: TArray<String>): TTerminalClass;
+begin
+  Result := TTerminal;
+
+  ACommands := ParseCommandLine(AInput);
 end;
 
 class function TTerminal.ProcessParams: TTerminalClass;

@@ -72,7 +72,7 @@ begin
         TTerminal.Stop;
       end,
       'Halt terminal')
-    .AddCommand('teste',
+    .AddCommand('align',
       procedure (ACommand: String)
       begin
         TTerminal
@@ -98,7 +98,27 @@ begin
           .WRL_R('R123456789', 0)
 
       end,
-      'Cursor position test')
+      'Text align test')
+    .AddCommand('command',
+      procedure (ACommand: String)
+      var
+        I: Integer;
+        Input: string;
+        Command: TArray<string>;
+      begin
+        TTerminal
+          .WR_L('Command test. Try sintaxes like: ')
+          .WRL_L('cmd -param1 simplevalue -param2 "composite value like this" -param3 simplevalue2',0, tcGray);
+
+        TTerminal.WR('Enter command: ');
+        readln(Input);
+
+        TTerminal.ParseCommandLine(Input, Command);
+        for I := 0 to Length(Command)-1 do begin
+          TTerminal.WRL_L(Command[I], 5, tcGray);
+        end;
+      end,
+      'Text align test')
     .Start
     .WaitFor
     .WRL('TERMINATED! Press ENTER to close.', 0, tcRed);
